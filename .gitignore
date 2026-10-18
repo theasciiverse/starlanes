@@ -3,3 +3,7 @@
 conf.make
 conf.h
 starlanes
+out/
+stage/
+dist/
+__pycache__/
