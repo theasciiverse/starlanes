@@ -28,7 +28,8 @@ COMPANY = (r"(?:Altair Starways|Beetlejuice, Ltd\.|Capella Freight Co\.|Denebola
 
 random.seed(7)
 
-# ncurses repeats a character with REP (CSI n b), which pyte does not know
+# ncurses repeats a character with REP (CSI n b) and scrolls part of the
+# screen with SU and SD (CSI n S, CSI n T), which pyte does not know
 _draw = pyte.Screen.draw
 
 
@@ -43,9 +44,31 @@ def _repeat_last(self, n=1, *rest, **kw):
         _draw(self, self.last_char * max(1, n))
 
 
+def _scroll_up(self, n=1, *rest, **kw):
+    """SU (CSI n S), which ncurses uses inside a scroll region."""
+    top, bottom = self.margins or pyte.screens.Margins(0, self.lines - 1)
+    for _ in range(max(1, n)):
+        for y in range(top, bottom):
+            self.buffer[y] = self.buffer[y + 1]
+        self.buffer.pop(bottom, None)
+    self.dirty.update(range(self.lines))
+
+
+def _scroll_down(self, n=1, *rest, **kw):
+    """SD (CSI n T)."""
+    top, bottom = self.margins or pyte.screens.Margins(0, self.lines - 1)
+    for _ in range(max(1, n)):
+        for y in range(bottom, top, -1):
+            self.buffer[y] = self.buffer[y - 1]
+        self.buffer.pop(top, None)
+    self.dirty.update(range(self.lines))
+
+
 pyte.Screen.draw = _draw_remembering
 pyte.Screen.repeat_last = _repeat_last
-pyte.Stream.csi = dict(pyte.Stream.csi, b="repeat_last")
+pyte.Screen.scroll_up = _scroll_up
+pyte.Screen.scroll_down = _scroll_down
+pyte.Stream.csi = dict(pyte.Stream.csi, b="repeat_last", S="scroll_up", T="scroll_down")
 
 
 class Rec:

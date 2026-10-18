@@ -75,7 +75,7 @@ past $2 billion overflows, as the man page warns.
   the conf.h upstream's `./conf` would write), and one archive per target
   with the binary, its man page, LICENSE.md, README.md and this file.
 - `asciiverse/record-preview.py`, `asciiverse/starlanes.cast`: the catalog
-  preview (100x30, 53 s) and the player that recorded it, reading the
+  preview (100x30, 52 s) and the player that recorded it, reading the
   screen through pyte: a two-player game that takes the offered move next
   to a company, a new company marker or a star, buys what it can afford,
   and quits into the final standings.
