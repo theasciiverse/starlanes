@@ -16,7 +16,7 @@ void quit_yn(void)
 {
     WINDOW *yn;
 
-    if ((yn = newwin(5, 42, 5, (SCREEN_COLUMNS - 42) / 2)) == NULL) {
+    if ((yn = sl_newwin(5, 42, 5, (SCREEN_COLUMNS - 42) / 2)) == NULL) {
         fprintf(stderr,
                 "starlanes: couldn't open window for y/n prompt\n");
         exit(1);
@@ -33,12 +33,12 @@ void quit_yn(void)
     wattroff(yn, QUIT_TEXT);
     wnoutrefresh(yn);
     doupdate();
-    if (toupper(getch()) == 'Y') {
-        delwin(yn);
+    if (toupper(sl_getch()) == 'Y') {
+        sl_delwin(yn);
         shutdown();
         exit(2);
     }
-    delwin(yn);
+    sl_delwin(yn);
     touchwin(mapwin);
     touchwin(coinfo);
     wnoutrefresh(mapwin);
@@ -51,9 +51,9 @@ void quit_yn(void)
 void shutdown(void)
 {
     show_standings(" GAME OVER - Final Standings ");
-    delwin(mapwin);
-    delwin(coinfo);
-    delwin(general);
+    sl_delwin(mapwin);
+    sl_delwin(coinfo);
+    sl_delwin(general);
     noraw();
     echo();
     clear();

@@ -56,7 +56,7 @@ int get_move(void)
         wmove(general, 2, 1 + strlen(s));
         wnoutrefresh(general);
         doupdate();
-        c = getch();
+        c = sl_getch();
         if (c == CTRL_L) {
             redraw();
             continue;

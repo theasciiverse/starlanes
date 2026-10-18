@@ -36,11 +36,141 @@ void color_setup(void)
     init_pair(14, COLOR_BLACK, COLOR_GREEN);
 }
 
+int origin_y, origin_x;         // Where the 80x24 screen starts
+int in_game;                    // True once the map is on the screen
+
+#define USED_LINES 24           // Rows the game draws on
+#define MAX_WINS 8
+
+static struct {
+    WINDOW *win;
+    WINDOW *copy;               // A pad: ncurses never cuts those down
+    int lines, cols, y, x;
+} wins[MAX_WINS];
+static int nwins;
+
+/**
+ * Works out where the screen goes to sit centred in the terminal.
+ */
+void place_origin(void)
+{
+    origin_y = LINES > USED_LINES ? (LINES - USED_LINES) / 2 : 0;
+    origin_x = COLS > SCREEN_COLUMNS ? (COLS - SCREEN_COLUMNS) / 2 : 0;
+}
+
+/**
+ * newwin at screen coordinates, remembered so it can be moved on resize.
+ */
+WINDOW *sl_newwin(int lines, int cols, int y, int x)
+{
+    WINDOW *win = newwin(lines, cols, y + origin_y, x + origin_x);
+
+    if (win != NULL && nwins < MAX_WINS) {
+        wins[nwins].win = win;
+        wins[nwins].copy = newpad(lines, cols);
+        wins[nwins].lines = lines;
+        wins[nwins].cols = cols;
+        wins[nwins].y = y;
+        wins[nwins].x = x;
+        nwins++;
+    }
+    return win;
+}
+
+/**
+ * delwin for a window made with sl_newwin.
+ */
+void sl_delwin(WINDOW *win)
+{
+    int i;
+
+    for (i = 0; i < nwins; i++)
+        if (wins[i].win == win) {
+            if (wins[i].copy != NULL)
+                delwin(wins[i].copy);
+            nwins--;
+            for (; i < nwins; i++)
+                wins[i] = wins[i + 1];
+            break;
+        }
+    delwin(win);
+}
+
+/**
+ * The title bar along the top of the game screen.
+ */
+void draw_titlebar(void)
+{
+    attron(color ? (YELLOW_ON_BLUE | A_BOLD) : A_REVERSE);
+    mvprintw(origin_y, origin_x, " StarLanes ");
+    attroff(color ? (YELLOW_ON_BLUE | A_BOLD) : A_REVERSE);
+    attron(color ? BLUE_ON_BLACK : A_NORMAL);
+    printw
+        ("=====================================================================");
+    attroff(color ? BLUE_ON_BLACK : A_NORMAL);
+}
+
+/**
+ * Moves everything to the middle of a resized terminal and draws it again.
+ */
+static void relayout(void)
+{
+    int i, h, w;
+
+    place_origin();
+    erase();
+    if (in_game)
+        draw_titlebar();
+    wnoutrefresh(stdscr);
+    for (i = 0; i < nwins; i++) {
+        getmaxyx(wins[i].win, h, w);
+        if (h != wins[i].lines || w != wins[i].cols) {
+            // ncurses cut the window down to fit a smaller terminal:
+            // grow it back and put back what it held
+            wresize(wins[i].win, wins[i].lines, wins[i].cols);
+            if (wins[i].copy != NULL)
+                copywin(wins[i].copy, wins[i].win, 0, 0, 0, 0,
+                        wins[i].lines - 1, wins[i].cols - 1, FALSE);
+        }
+        mvwin(wins[i].win, wins[i].y + origin_y, wins[i].x + origin_x);
+    }
+    for (i = 0; i < nwins; i++) {
+        WINDOW *win = wins[i].win;
+        if (!in_game && (win == mapwin || win == coinfo || win == general))
+            continue;
+        touchwin(win);
+        wnoutrefresh(win);
+    }
+    doupdate();
+}
+
+/**
+ * getch that follows terminal resizes instead of returning them.
+ */
+int sl_getch(void)
+{
+    int c, i;
+
+    for (;;) {
+        for (i = 0; i < nwins; i++)     // What to put back if it gets cut
+            if (wins[i].copy != NULL)
+                copywin(wins[i].win, wins[i].copy, 0, 0, 0, 0,
+                        wins[i].lines - 1, wins[i].cols - 1, FALSE);
+        if ((c = getch()) != KEY_RESIZE)
+            return c;
+        relayout();
+    }
+}
+
 /**
  * Redraws the screen.
  */
 void redraw(void)
 {
+    if (!in_game) {             // Only the title screen is up
+        relayout();
+        return;
+    }
     touchwin(stdscr);
     touchwin(mapwin);
     touchwin(coinfo);
@@ -78,7 +208,7 @@ int my_mvwgetstr(WINDOW *win, int y, int x, int max, int num_only, char *s)
     noecho();
     raw();
     keypad(stdscr, 0);
-    while (doupdate(), c = getch(), !done && (c != LF && c != CR)) {
+    while (doupdate(), c = sl_getch(), !done && (c != LF && c != CR)) {
         if (c == CTRL_L) {
             redraw();
             continue;

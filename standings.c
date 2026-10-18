@@ -37,7 +37,7 @@ void show_standings(char *title)
     int i, j, order[MAXPLAYERS], togo, sum;
 
     if ((stand =
-         newwin(9 + numplayers, 60, 5, (SCREEN_COLUMNS - 60) / 2)) == NULL) {
+         sl_newwin(9 + numplayers, 60, 5, (SCREEN_COLUMNS - 60) / 2)) == NULL) {
         fprintf(stderr, "starlanes: couldn't create standings window\n");
         exit(1);
     }
@@ -89,8 +89,8 @@ void show_standings(char *title)
     center(stand, 60, 7 + numplayers, "Press any key to continue...");
     wnoutrefresh(stand);
     doupdate();
-    getch();
-    delwin(stand);
+    sl_getch();
+    sl_delwin(stand);
     touchwin(mapwin);
     touchwin(general);
     touchwin(coinfo);

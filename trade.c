@@ -71,7 +71,7 @@ void buy_sell(void)
         raw();
         noecho();
         doupdate();
-        switch (getch()) {
+        switch (sl_getch()) {
         case CTRL_L:
             redraw();
             break;

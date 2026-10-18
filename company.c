@@ -77,7 +77,7 @@ void more_coinfo(void)
         return;                 // Don't bother if there are no active co's
 
     if ((more_coinfo =
-         newwin(7 + numco, 52, 5, (SCREEN_COLUMNS - 52) / 2)) == NULL) {
+         sl_newwin(7 + numco, 52, 5, (SCREEN_COLUMNS - 52) / 2)) == NULL) {
         fprintf(stderr, "starlanes: couldn't create more_coinfo window\n");
         exit(1);
     }
@@ -132,8 +132,8 @@ void more_coinfo(void)
     center(more_coinfo, 52, 5 + numco, "Press any key to continue...");
     wnoutrefresh(more_coinfo);
     doupdate();
-    getch();
-    delwin(more_coinfo);
+    sl_getch();
+    sl_delwin(more_coinfo);
     touchwin(mapwin);
     touchwin(general);
     touchwin(coinfo);

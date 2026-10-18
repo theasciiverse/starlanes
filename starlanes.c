@@ -26,6 +26,7 @@ void initialize(void)
     // Get the size of the screen
     SCREEN_LINES = DEF_SCREEN_LINES;
     SCREEN_COLUMNS = DEF_SCREEN_COLUMNS;
+    place_origin();
 
     // Allocate space for everything
 
@@ -93,19 +94,19 @@ void initialize(void)
 
     // Create the windows
 
-    if ((mapwin = newwin(MAPY + 2, MAPX * 3 + 2, 1, 1)) == NULL) {
+    if ((mapwin = sl_newwin(MAPY + 2, MAPX * 3 + 2, 1, 1)) == NULL) {
         fprintf(stderr, "starlanes: can't create map window\n");
         exit(1);
     }
 
     if ((general =
-         newwin(SCREEN_LINES - 2 - MAPY - 2, SCREEN_COLUMNS - 2, MAPY + 3, 1)) == NULL) {
+         sl_newwin(SCREEN_LINES - 2 - MAPY - 2, SCREEN_COLUMNS - 2, MAPY + 3, 1)) == NULL) {
         fprintf(stderr, "starlanes: can't create general window\n");
         exit(1);
     }
 
     if ((coinfo =
-         newwin(MAPY + 2, SCREEN_COLUMNS - 2 - (MAPX * 3 + 2), 1,
+         sl_newwin(MAPY + 2, SCREEN_COLUMNS - 2 - (MAPX * 3 + 2), 1,
                 MAPX * 3 + 3)) == NULL) {
         fprintf(stderr, "starlanes: can't create coinfo window\n");
         exit(1);
@@ -128,7 +129,9 @@ void get_num_players(void)
     clear();
     refresh();
 
-    WINDOW *npwin = newwin(SCREEN_LINES, SCREEN_COLUMNS, 0, 0);
+    // One row short of SCREEN_LINES, so it fits an 80x24 terminal like
+    // the game screen does
+    WINDOW *npwin = sl_newwin(SCREEN_LINES - 1, SCREEN_COLUMNS, 0, 0);
 
     if (color)
         wattron(npwin, YELLOW_ON_BLACK | A_BOLD);
@@ -136,7 +139,7 @@ void get_num_players(void)
     box(npwin, '$', '$');
 
     sprintf(s, " V%s ", VERSION);
-    center(npwin, SCREEN_COLUMNS, SCREEN_LINES - 1, s);
+    center(npwin, SCREEN_COLUMNS, SCREEN_LINES - 2, s);
     if (color)
         wattroff(npwin, YELLOW_ON_BLACK | A_BOLD);
 
@@ -149,7 +152,7 @@ void get_num_players(void)
     noecho();
     raw();
     do {
-        c = getch() - '0';
+        c = sl_getch() - '0';
     } while (c < 1 || c > MAXPLAYERS);
     waddch(npwin, c + '0');
 
@@ -168,7 +171,7 @@ void get_num_players(void)
     }
     nonl();
 
-    delwin(npwin);
+    sl_delwin(npwin);
     clear();
     refresh();
 }
@@ -237,6 +240,12 @@ int main(int argc, char *argv[])
     }
 
     initscr();
+    if (LINES < DEF_SCREEN_LINES - 1 || COLS < DEF_SCREEN_COLUMNS) {
+        endwin();
+        fprintf(stderr, "starlanes: the terminal must be at least %dx%d\n",
+                DEF_SCREEN_COLUMNS, DEF_SCREEN_LINES - 1);
+        return 1;
+    }
     start_color();
 
     if (colorforce)
@@ -259,13 +268,8 @@ int main(int argc, char *argv[])
     get_num_players();
 
     clear();
-    attron(color ? (YELLOW_ON_BLUE | A_BOLD) : A_REVERSE);
-    mvprintw(0, 0, " StarLanes ");
-    attroff(color ? (YELLOW_ON_BLUE | A_BOLD) : A_REVERSE);
-    attron(color ? BLUE_ON_BLACK : A_NORMAL);
-    printw
-        ("=====================================================================");
-    attroff(color ? BLUE_ON_BLACK : A_NORMAL);
+    in_game = 1;
+    draw_titlebar();
     wnoutrefresh(stdscr);
     showmap();
     show_coinfo();

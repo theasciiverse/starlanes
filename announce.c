@@ -27,7 +27,7 @@ void new_co_announce(int newc)
     noecho();
     raw();
     doupdate();
-    while (getch() == CTRL_L)
+    while (sl_getch() == CTRL_L)
         redraw();
 }
 
@@ -84,7 +84,7 @@ void suck_announce(int conum, int grown)
     noecho();
     raw();
     doupdate();
-    while (getch() == CTRL_L)
+    while (sl_getch() == CTRL_L)
         redraw();
 }
 
@@ -106,7 +106,7 @@ void merge_announce(int c1, int c2)
     noecho();
     raw();
     doupdate();
-    while (getch() == CTRL_L)
+    while (sl_getch() == CTRL_L)
         redraw();
 }
 
@@ -152,7 +152,7 @@ void xaction_announce(int c1, int c2)
     noecho();
     raw();
     doupdate();
-    while (getch() == CTRL_L)
+    while (sl_getch() == CTRL_L)
         redraw();
 }
 
@@ -181,7 +181,7 @@ void split_announce(int conum)
     noecho();
     raw();
     doupdate();
-    while (getch() == CTRL_L)
+    while (sl_getch() == CTRL_L)
         redraw();
 }
 
