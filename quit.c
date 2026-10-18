@@ -36,7 +36,7 @@ void quit_yn(void)
     if (toupper(sl_getch()) == 'Y') {
         sl_delwin(yn);
         shutdown();
-        exit(2);
+        exit(0);
     }
     sl_delwin(yn);
     touchwin(mapwin);

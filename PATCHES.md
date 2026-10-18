@@ -69,6 +69,10 @@ Barnsdale's 1.3.0 added one, which Beej could not get to run without
 crashing), and money is a C `int`, so a runaway single-player fortune
 past $2 billion overflows, as the man page warns.
 
+- `quit.c`: a confirmed quit ("Really Quit?" then y) exits with status 0
+  instead of 2. Quitting is a normal end of play, and av reports any
+  non-zero exit as a failure ("exited with code 2").
+
 ## Packaging (new files)
 
 - `asciiverse/build.sh`, `asciiverse/package.sh`: one compiler call (with
