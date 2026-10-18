@@ -117,6 +117,9 @@ static void relayout(void)
 {
     int i, h, w;
 
+#ifdef PDCURSES
+    resize_term(0, 0);          // PDCurses leaves this to the program
+#endif
     place_origin();
     erase();
     if (in_game)
