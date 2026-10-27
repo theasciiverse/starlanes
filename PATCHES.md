@@ -72,6 +72,9 @@ past $2 billion overflows, as the man page warns.
 - `quit.c`: a confirmed quit ("Really Quit?" then y) exits with status 0
   instead of 2. Quitting is a normal end of play, and av reports any
   non-zero exit as a failure ("exited with code 2").
+- **How to play it, at the top of README.md.** A short note on installing and
+  starting it with av, or from a release archive; the original text follows
+  unchanged.
 
 ## Packaging (new files)
 

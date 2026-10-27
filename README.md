@@ -1,3 +1,16 @@
+> **Play it with Asciiverse.** With [av](https://asciiverse.sh), the Asciiverse
+> client:
+>
+> ```
+> av install starlanes
+> av play starlanes
+> ```
+>
+> Or download the archive for your system from this repository's Releases,
+> unpack it and run `./starlanes` (`starlanes.exe` on Windows).
+>
+> The original README follows.
+
 # Star Lanes
 
 This is a C version of the classic space trading game [_Star
