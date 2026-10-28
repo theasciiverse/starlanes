@@ -6,9 +6,6 @@
 > av play starlanes
 > ```
 >
-> Or download the archive for your system from this repository's Releases,
-> unpack it and run `./starlanes` (`starlanes.exe` on Windows).
->
 > The original README follows.
 
 # Star Lanes
